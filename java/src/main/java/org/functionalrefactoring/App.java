@@ -1,23 +1,35 @@
 package org.functionalrefactoring;
 
-import org.functionalrefactoring.models.*;
+import org.functionalrefactoring.models.Amount;
+import org.functionalrefactoring.models.Cart;
+import org.functionalrefactoring.models.CartId;
+import org.functionalrefactoring.models.CustomerId;
+import org.functionalrefactoring.models.DiscountRule;
+import org.functionalrefactoring.models.Storage;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 public class App {
     public static void applyDiscount(CartId cartId, Storage<Cart> storage) { // TODO void?
-        Optional<Cart> o = Optional.empty();
+        Optional<Cart> o = applyDiscount(cartId);
+        o.ifPresent(updatedCart -> save(updatedCart, storage)); // TODO side effect
+    }
+
+    public static Optional<Cart> applyDiscount(CartId cartId) {
         Cart cart = loadCart(cartId);
+
         if (cart != Cart.MissingCart) {
             DiscountRule rule = lookupDiscountRule(cart.customerId);
+
             if (rule != DiscountRule.NoDiscount) {
                 Amount discount = rule.apply(cart);
                 Cart updatedCart = updateAmount(cart, discount);
-                o = Optional.of(updatedCart);
+                return Optional.of(updatedCart);
             }
         }
-        o.ifPresent(updatedCart -> save(updatedCart, storage)); // TODO side effect
+
+        return Optional.empty();
     }
 
     // ideas
