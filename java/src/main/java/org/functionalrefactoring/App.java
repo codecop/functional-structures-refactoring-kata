@@ -37,9 +37,8 @@ public class App {
     }
 
     public static Optional<Cart> applyDiscount(CartId cartId) { // pure
-        Cart cart = loadCart(cartId);
-
-        if (cart != Cart.MissingCart) {
+        Optional<Cart> o = loadCart(cartId);
+        return o.flatMap(cart -> {
             DiscountRule rule = lookupDiscountRule(cart.customerId);
 
             if (rule != DiscountRule.NoDiscount) {
@@ -47,21 +46,20 @@ public class App {
                 Cart updatedCart = updateAmount(cart, discount);
                 return Optional.of(updatedCart);
             }
-        }
-
-        return Optional.empty();
+            return Optional.<Cart>empty();
+        });
     }
 
     // ideas
     // * make pure - return a saver function (Optional[Writer[Cart]])
     // * make SRP - split cart creation from save, only save needs storage
 
-    private static Cart loadCart(CartId id) { // Cart is immutable, function is pure
+    private static Optional<Cart> loadCart(CartId id) { // Cart is immutable, function is pure
         if (id.value.contains("gold"))
-            return new Cart(id, new CustomerId("gold-customer"), new Amount(new BigDecimal(100)));
+            return Optional.of(new Cart(id, new CustomerId("gold-customer"), new Amount(new BigDecimal(100))));
         if (id.value.contains("normal"))
-            return new Cart(id, new CustomerId("normal-customer"), new Amount(new BigDecimal(100)));
-        return Cart.MissingCart;
+            return Optional.of(new Cart(id, new CustomerId("normal-customer"), new Amount(new BigDecimal(100))));
+        return Optional.empty();
     }
 
     private static DiscountRule lookupDiscountRule(CustomerId id) { // DiscountRule is function, function is pure
