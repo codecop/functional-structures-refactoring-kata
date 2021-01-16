@@ -14,21 +14,21 @@ public class App {
 
     static class Saver<T> { // Writer[Optional[T]]
 
-        private final Optional<T> o;
+        private final Optional<T> item;
 
-        public Saver(Optional<T> o) {
-            this.o = o;
+        public Saver(Optional<T> item) {
+            this.item = item;
         }
 
-        public void save(Storage<T> storage) {
-            o.ifPresent(storage::flush);
+        public void saveTo(Storage<T> storage) {
+            item.ifPresent(storage::flush);
         }
 
     }
 
-    public static void applyAndStoreDiscount(CartId cartId, Storage<Cart> storage) { // TODO void?
+    public static void applyAndStoreDiscount(CartId cartId, Storage<Cart> storage) { // TODO void
         Saver<Cart> saver = appplyDiscountForSave(cartId);
-        saver.save(storage); // TODO side effect
+        saver.saveTo(storage); // TODO side effect
     }
 
     public static Saver<Cart> appplyDiscountForSave(CartId cartId) { // pure
@@ -37,10 +37,10 @@ public class App {
     }
 
     public static Optional<Cart> applyDiscount(CartId cartId) { // pure
-        Optional<Cart> ocart = loadCart(cartId);
-        return ocart.flatMap(cart -> {
-            Optional<DiscountRule> orule = lookupDiscountRule(cart.customerId);
-            return orule.map(rule -> {
+        Optional<Cart> oCart = loadCart(cartId);
+        return oCart.flatMap(cart -> {
+            Optional<DiscountRule> oRule = lookupDiscountRule(cart.customerId);
+            return oRule.map(rule -> {
                 Amount discount = rule.apply(cart);
                 Cart updatedCart = updateAmount(cart, discount);
                 return updatedCart;
@@ -50,7 +50,7 @@ public class App {
 
     // ideas
     // * make pure - return a saver function (Optional[Writer[Cart]])
-    // * make SRP - split cart creation from save, only save needs storage
+    // * make SRP - split cart creation from "save", only "save" needs storage
 
     private static Optional<Cart> loadCart(CartId id) { // Cart is immutable, function is pure
         if (id.value.contains("gold"))
