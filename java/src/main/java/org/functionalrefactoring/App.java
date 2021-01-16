@@ -11,12 +11,32 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 public class App {
-    public static void applyDiscount(CartId cartId, Storage<Cart> storage) { // TODO void?
-        Optional<Cart> o = applyDiscount(cartId);
-        o.ifPresent(updatedCart -> save(updatedCart, storage)); // TODO side effect
+
+    static class Saver<T> { // Writer[Optional[T]]
+
+        private final Optional<T> o;
+
+        public Saver(Optional<T> o) {
+            this.o = o;
+        }
+
+        void save(Storage<T> storage) {
+            o.ifPresent(storage::flush);
+        }
+
     }
 
-    public static Optional<Cart> applyDiscount(CartId cartId) {
+    public static void applyAndStoreDiscount(CartId cartId, Storage<Cart> storage) { // TODO void?
+        Saver<Cart> saver = appplyDiscountForSave(cartId);
+        saver.save(storage); // TODO side effect
+    }
+
+    public static Saver<Cart> appplyDiscountForSave(CartId cartId) { // pure
+        Optional<Cart> o = applyDiscount(cartId);
+        return new Saver<>(o);
+    }
+
+    public static Optional<Cart> applyDiscount(CartId cartId) { // pure
         Cart cart = loadCart(cartId);
 
         if (cart != Cart.MissingCart) {

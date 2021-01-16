@@ -17,7 +17,7 @@ public class AppTest {
         CartId cartId = new CartId("some-gold-cart");
         SpyStorage storage = new SpyStorage();
 
-        App.applyDiscount(cartId, storage);
+        App.applyAndStoreDiscount(cartId, storage);
 
         Cart expected = new Cart(new CartId("some-gold-cart"), new CustomerId("gold-customer"), new Amount(new BigDecimal(50)));
         assertThat(storage.saved, is(expected));
@@ -29,7 +29,7 @@ public class AppTest {
         CartId cartId = new CartId("some-normal-cart");
         SpyStorage storage = new SpyStorage();
 
-        App.applyDiscount(cartId, storage);
+        App.applyAndStoreDiscount(cartId, storage);
 
         assertThat(storage.saved, nullValue());
     }
@@ -40,7 +40,7 @@ public class AppTest {
         CartId cartId = new CartId("missing-cart");
         SpyStorage storage = new SpyStorage();
 
-        App.applyDiscount(cartId, storage);
+        App.applyAndStoreDiscount(cartId, storage);
 
         assertThat(storage.saved, nullValue());
     }
