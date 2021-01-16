@@ -37,16 +37,14 @@ public class App {
     }
 
     public static Optional<Cart> applyDiscount(CartId cartId) { // pure
-        Optional<Cart> o = loadCart(cartId);
-        return o.flatMap(cart -> {
-            DiscountRule rule = lookupDiscountRule(cart.customerId);
-
-            if (rule != DiscountRule.NoDiscount) {
+        Optional<Cart> ocart = loadCart(cartId);
+        return ocart.flatMap(cart -> {
+            Optional<DiscountRule> orule = lookupDiscountRule(cart.customerId);
+            return orule.map(rule -> {
                 Amount discount = rule.apply(cart);
                 Cart updatedCart = updateAmount(cart, discount);
-                return Optional.of(updatedCart);
-            }
-            return Optional.<Cart>empty();
+                return updatedCart;
+            });
         });
     }
 
@@ -62,9 +60,9 @@ public class App {
         return Optional.empty();
     }
 
-    private static DiscountRule lookupDiscountRule(CustomerId id) { // DiscountRule is function, function is pure
-        if (id.value.contains("gold")) return new DiscountRule(App::half);
-        return DiscountRule.NoDiscount;
+    private static Optional<DiscountRule> lookupDiscountRule(CustomerId id) { // DiscountRule is function, function is pure
+        if (id.value.contains("gold")) return Optional.of(new DiscountRule(App::half));
+        return Optional.empty();
     }
 
     private static Cart updateAmount(Cart cart, Amount discount) { // Cart is immutable, function is pure
