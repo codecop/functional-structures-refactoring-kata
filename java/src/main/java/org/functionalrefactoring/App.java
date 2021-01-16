@@ -20,7 +20,7 @@ public class App {
             this.o = o;
         }
 
-        void save(Storage<T> storage) {
+        public void save(Storage<T> storage) {
             o.ifPresent(storage::flush);
         }
 
@@ -33,7 +33,7 @@ public class App {
 
     public static Saver<Cart> appplyDiscountForSave(CartId cartId) { // pure
         Optional<Cart> o = applyDiscount(cartId);
-        return new Saver<>(o);
+        return new Saver<>(o); // not testable
     }
 
     public static Optional<Cart> applyDiscount(CartId cartId) { // pure
