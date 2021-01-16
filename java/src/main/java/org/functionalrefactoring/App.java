@@ -37,7 +37,7 @@ public class App {
     }
 
     public static Optional<Cart> applyDiscount(CartId cartId) { // pure
-        Optional<Cart> oCart = loadCart(cartId);
+        Optional<Cart> oCart = loadCart(cartId); // TODO in reality load is a side effect from DB
         return oCart.flatMap(cart -> {
             Optional<DiscountRule> oRule = lookupDiscountRule(cart.customerId);
             return oRule.map(rule -> {
